@@ -1,0 +1,45 @@
+[versions]
+agp = "8.8.2"
+kotlin = "1.9.24"
+coreKtx = "1.17.0"
+junit = "4.13.2"
+junitVersion = "1.3.0"
+espressoCore = "3.7.0"
+appcompat = "1.7.1"
+material = "1.13.0"
+activity = "1.11.0"
+constraintlayout = "2.2.1"
+
+
+#xiaoming6672 start
+library_adapter = "2.6.0"
+library_utils = "1.2.9"
+anim = "1.2.0"
+banner = "2.2.0"
+common = "1.2.3"
+#xiaoming6672 end
+
+
+[libraries]
+androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+junit = { group = "junit", name = "junit", version.ref = "junit" }
+androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
+androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
+androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompat" }
+material = { group = "com.google.android.material", name = "material", version.ref = "material" }
+androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+#xiaoming6672 start
+library-adapter = { group = "com.github.xiaoming6672", name = "Library_adapter", version.ref = "library_adapter" }
+library-utils = { group = "com.github.xiaoming6672", name = "Library_utils", version.ref = "library_utils" }
+library-common = { group = "com.github.xiaoming6672", name = "Library_common", version.ref = "common" }
+library-anim = { group = "com.github.xiaoming6672", name = "animation", version.ref = "anim" }
+library-banner = { group = "com.github.xiaoming6672", name = "banner", version.ref = "banner" }
+#xiaoming6672 end
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }
+kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+android-library = { id = "com.android.library", version.ref = "agp" }
+

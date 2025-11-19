@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="text_pull_to_refresh_header_drag">下拉刷新</string>
+    <string name="text_pull_to_refresh_header_release">松开开始刷新</string>
+    <string name="text_pull_to_refresh_footer_drag">上拉加载</string>
+    <string name="text_pull_to_refresh_footer_release">松开开始加载</string>
+    <string name="text_pull_to_refresh_loading">加载中……</string>
+</resources>

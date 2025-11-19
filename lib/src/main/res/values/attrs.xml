@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="XMStrokeTextView">
+        <attr name="strokeColor" format="color" />
+        <attr name="strokeWidth" format="dimension" />
+        <attr name="autoFitSpace" format="boolean" />
+    </declare-styleable>
+
+    <declare-styleable name="XMGradientTextView">
+        <attr name="gradientOrientation" format="enum">
+            <enum name="horizontal" value="0" />
+            <enum name="vertical" value="1" />
+        </attr>
+        <attr name="gradientStart" format="color" />
+        <attr name="gradientCenter" format="color" />
+        <attr name="gradientEnd" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="XMSlideMarqueeView">
+        <attr name="slide_distance" format="integer" />
+        <attr name="slide_timemillis" format="integer" />
+        <attr name="slide_orientation" format="enum">
+            <enum name="horizontal" value="0" />
+            <enum name="vertical" value="1" />
+        </attr>
+    </declare-styleable>
+
+    <declare-styleable name="XMRoundedImageView">
+        <!-- Defines the radius of the four corners. -->
+        <attr name="radius" format="dimension" />
+        <!-- Radius of the top left corner. -->
+        <attr name="radiusTopLeft" format="dimension" />
+        <!-- Radius of the top right corner. -->
+        <attr name="radiusTopRight" format="dimension" />
+        <!-- Radius of the bottom left corner. -->
+        <attr name="radiusBottomLeft" format="dimension" />
+        <!-- Radius of the bottom right corner. -->
+        <attr name="radiusBottomRight" format="dimension" />
+    </declare-styleable>
+
+    <declare-styleable name="XMAutoSizeTextView">
+        <attr name="autoSizeEnable" format="boolean" />
+        <attr name="autoSizeMaxLine" format="integer" />
+    </declare-styleable>
+
+    <declare-styleable name="XMCustomTitleView">
+        <!--自动适配状态栏高度，默认不适配-->
+        <attr name="autoFitStatusBar" format="boolean" />
+
+        <!--返回键-->
+        <attr name="backRes" format="reference" />
+        <!--隐藏返回键，默认不隐藏-->
+        <attr name="hideBack" format="boolean" />
+        <!--返回键的色调-->
+        <attr name="backTint" format="color" />
+
+        <!--标题名称-->
+        <attr name="titleName" format="string|reference" />
+        <!--标题字色，默认黑色-->
+        <attr name="titleTextColor" format="reference|color" />
+        <!--标题字号，默认18sp-->
+        <attr name="titleTextSize" format="dimension" />
+        <!--标题是否加粗，默认加粗-->
+        <attr name="titleBold" format="boolean" />
+
+        <!--右侧功能图标-->
+        <attr name="functionIcon" format="reference" />
+        <!--右侧功能名-->
+        <attr name="functionName" format="string|reference" />
+        <!--右侧功能名字色，默认黑色-->
+        <attr name="functionTextColor" format="color|reference" />
+        <!--右侧功能名字号，默认14sp-->
+        <attr name="functionTextSize" format="dimension" />
+        <!--右侧功能偏移量-->
+        <attr name="functionOffset" format="dimension" />
+    </declare-styleable>
+
+
+    <attr name="fitsSystemStyle">
+        <enum name="none" value="0" />
+        <enum name="padding" value="1" />
+        <enum name="margin" value="2" />
+    </attr>
+
+    <declare-styleable name="XMFitsSystemConstraintLayout">
+        <attr name="fitsSystemStyle" />
+    </declare-styleable>
+
+    <declare-styleable name="XMFitsSystemFrameLayout">
+        <attr name="fitsSystemStyle" />
+    </declare-styleable>
+
+    <declare-styleable name="XMFitsSystemLinearLayout">
+        <attr name="fitsSystemStyle" />
+    </declare-styleable>
+
+    <declare-styleable name="XMFitsSystemRelativeLayout">
+        <attr name="fitsSystemStyle" />
+    </declare-styleable>
+</resources>
