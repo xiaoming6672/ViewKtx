@@ -35,6 +35,11 @@ dependencyResolutionManagement {
         maven("https://jitpack.io")
         maven("https://repo1.maven.org/maven2/")
     }
+    versionCatalogs {
+        create("config") {
+            from(files("gradle/config.versions.toml"))
+        }
+    }
 }
 
 rootProject.name = "ViewKtx"

@@ -6,6 +6,12 @@
         <attr name="autoFitSpace" format="boolean" />
     </declare-styleable>
 
+    <declare-styleable name="StrokeTextView">
+        <attr name="strokeColor" />
+        <attr name="strokeWidth" />
+        <attr name="autoFitSpace" />
+    </declare-styleable>
+
     <declare-styleable name="XMGradientTextView">
         <attr name="gradientOrientation" format="enum">
             <enum name="horizontal" value="0" />

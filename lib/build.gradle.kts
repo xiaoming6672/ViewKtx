@@ -1,14 +1,25 @@
+import com.android.build.gradle.internal.api.LibraryVariantOutputImpl
+
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.kotlin.android)
+    id("kotlin-android")
+    `maven-publish`
 }
+
+
+val libGropuId = config.versions.libGroupId.get()
+val libArtifactId = config.versions.libArtifactId.get()
+val libVersionCode = config.versions.libVersionCode.get()
+val libVersionName = config.versions.libVersionName.get()
+
 
 android {
     namespace = "com.zhang.view"
-    compileSdk = 35
+    compileSdk = config.versions.compileSdk.get().toInt()
 
     defaultConfig {
-        minSdk = 24
+        minSdk = config.versions.minSdk.get().toInt()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles("consumer-rules.pro")
@@ -31,6 +42,20 @@ android {
         buildConfig = true
         viewBinding = true
     }
+
+    android.libraryVariants.all {
+        outputs.all {
+            if (this is LibraryVariantOutputImpl) {
+                outputFileName = "${rootProject.name}-$name-$libVersionCode-$libVersionName.aar"
+            }
+        }
+    }
+
+    publishing {
+        singleVariant("release") {
+            withSourcesJar()
+        }
+    }
 }
 
 dependencies {
@@ -45,4 +70,29 @@ dependencies {
     implementation(libs.library.utils)
     implementation(libs.library.adapter)
     implementation(libs.library.common)
+    implementation(libs.lib.ktx)
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("release") {
+            groupId = libGropuId
+            artifactId = libArtifactId
+            version = libVersionName
+
+            afterEvaluate {
+                from(components["release"])
+            }
+        }
+    }
+
+    repositories {
+        maven {
+            setUrl("https://packages.aliyun.com/maven/repository/2495277-release-LwpiHW")
+            credentials {
+                username = "66f6606383d62ab44fa5d54f"
+                password = "s4BvVpAib[-I"
+            }
+        }
+    }
 }

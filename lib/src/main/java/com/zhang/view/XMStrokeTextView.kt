@@ -5,16 +5,9 @@ import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint.Style
-import android.graphics.Typeface
-import android.graphics.drawable.Drawable
-import android.text.SpannableStringBuilder
-import android.text.TextUtils
 import android.util.AttributeSet
-import android.util.TypedValue
-import android.view.ViewGroup
-import android.widget.TextView
 import androidx.appcompat.widget.AppCompatTextView
-import com.zhang.library.utils.context.ResUtils
+import com.zhang.lib.ktx.number.dp
 
 /**
  * 文字带描边效果的TextView
@@ -27,208 +20,140 @@ open class XMStrokeTextView @JvmOverloads constructor(
     defStyleAttr : Int = 0 ,
 ) : AppCompatTextView(context , attrs , defStyleAttr) {
 
-    /** 用于描边的TextView  */
-    protected val strokeTextView : TextView
 
-    /** 描边宽度  */
-    private var mStrokeWidth = 0f
-
-    /** 描边颜色  */
-    var strokeColor : ColorStateList? = null
+    /**描边粗细大小*/
+    var strokeWidth = 0F
         private set
 
-    /** 是否自动填充空格适应左右两边  */
-    private var autoFitSpace = true
+    /**描边颜色*/
+    lateinit var strokeColor : ColorStateList
+        private set
+
+    /**自动适应补充空格*/
+    var autoFitSpace = false
 
 
     init {
-        init(attrs)
-
-        strokeTextView = TextView(context , attrs , defStyleAttr)
-        initStrokeTextView()
+        initAttribute(attrs)
     }
 
-    private fun init(attrs : AttributeSet?) {
-        if (attrs == null) {
-            strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
-            mStrokeWidth = 0f
-            autoFitSpace = true
-        } else {
-            val a = context.obtainStyledAttributes(attrs , R.styleable.XMStrokeTextView)
-            strokeColor =
-                if (a.hasValue(R.styleable.XMStrokeTextView_strokeColor)) a.getColorStateList(R.styleable.XMStrokeTextView_strokeColor) else ColorStateList.valueOf(
-                    Color.TRANSPARENT
-                )
-            mStrokeWidth =
-                if (a.hasValue(R.styleable.XMStrokeTextView_strokeWidth)) a.getDimension(
-                    R.styleable.XMStrokeTextView_strokeWidth ,
-                    ResUtils.dp2px(1f).toFloat()
-                ) else 0f
-            autoFitSpace = a.getBoolean(R.styleable.XMStrokeTextView_autoFitSpace , true)
+    private fun initAttribute(attrs : AttributeSet?) {
+        attrs?.let {
+            with(context.obtainStyledAttributes(attrs , R.styleable.XMStrokeTextView)) {
+                strokeColor = getColorStateList(R.styleable.XMStrokeTextView_strokeColor)
+                    ?: ColorStateList.valueOf(Color.TRANSPARENT)
 
-            a.recycle()
+                strokeWidth = getDimension(R.styleable.XMStrokeTextView_strokeWidth , 0F)
+                autoFitSpace = getBoolean(R.styleable.XMStrokeTextView_autoFitSpace , false)
+
+                recycle()
+            }
         }
     }
 
-    private fun initStrokeTextView() {
-        strokeTextView.compoundDrawablePadding = compoundDrawablePadding
-
-        val drawables = compoundDrawablesRelative
-        if (drawables.isNotEmpty()) strokeTextView.setCompoundDrawables(drawables[0] , drawables[1] , drawables[2] , drawables[3])
-
-        strokeTextView.setTextColor(strokeColor)
-        strokeTextView.setTextSize(TypedValue.COMPLEX_UNIT_PX , textSize)
-        val strokePaint = strokeTextView.paint
-        strokePaint.strokeWidth = mStrokeWidth
-        strokePaint.style = Style.STROKE
+    /**
+     * 设置描边粗细
+     *
+     * @param width 粗细大小，单位：px
+     */
+    fun setStrokeWidth(width : Float) {
+        strokeWidth = width
+        postInvalidate()
     }
 
-    override fun setTypeface(tf : Typeface?) {
-        strokeTextView.typeface = tf
-
-        super.setTypeface(tf)
+    /**
+     * 设置描边粗细
+     *
+     * @param width 粗细大小，单位：dp
+     */
+    fun setStrokeWidth(width : Int) {
+        strokeWidth = width.dp.toFloat()
+        postInvalidate()
     }
 
-    override fun setTypeface(tf : Typeface? , style : Int) {
-        strokeTextView.setTypeface(tf , style)
-
-        super.setTypeface(tf , style)
+    /**
+     * 设置描边颜色
+     *
+     * @param color 颜色
+     */
+    fun setStrokeColor(color : Int) {
+        strokeColor = ColorStateList.valueOf(color)
+        postInvalidate()
     }
 
-    override fun setGravity(gravity : Int) {
-        strokeTextView.gravity = gravity
-
-        super.setGravity(gravity)
+    /**
+     * 设置描边颜色
+     *
+     * @param color 颜色
+     */
+    fun setStrokeColor(color : ColorStateList) {
+        strokeColor = color
+        postInvalidate()
     }
 
-    override fun setLayoutParams(params : ViewGroup.LayoutParams) {
-        strokeTextView.layoutParams = params
-
-        super.setLayoutParams(params)
+    override fun setText(text : CharSequence? , type : BufferType?) {
+        if (autoFitSpace) {
+            text.takeUnless { it.isNullOrEmpty() }?.let {
+                val builder = StringBuilder()
+                if (it[0] != ' ') {
+                    builder.append(" ")
+                }
+                builder.append(it)
+                super.setText(builder , type)
+            } ?: run {
+                super.setText(text , type)
+            }
+        } else {
+            super.setText(text , type)
+        }
     }
 
     override fun onMeasure(widthMeasureSpec : Int , heightMeasureSpec : Int) {
-        val text = strokeTextView.text
-        if (TextUtils.isEmpty(text) || text != getText()) {
-            strokeTextView.text = getText()
-            this.postInvalidate()
-        }
-
-        strokeTextView.measure(widthMeasureSpec , heightMeasureSpec)
+        // 1. 先让父类计算出文本本身的尺寸
         super.onMeasure(widthMeasureSpec , heightMeasureSpec)
-    }
 
-    override fun onLayout(changed : Boolean , left : Int , top : Int , right : Int , bottom : Int) {
-        strokeTextView.layout(left , top , right , bottom)
+        if (strokeWidth > 0) {
+            // 2. 获取原始计算出的宽高
+            val originalWidth = measuredWidth
+            val originalHeight = measuredHeight
 
-        super.onLayout(changed , left , top , right , bottom)
-    }
+            // 3. 增加描边宽度
+            // 描边是居中于文本轮廓绘制的，所以需要左右/上下各留出 strokeWidth
+            val newWidth = strokeWidth.times(2).plus(originalWidth).toInt()
+            val newHeight = strokeWidth.times(2).plus(originalHeight).toInt()
 
-    override fun setEnabled(enabled : Boolean) {
-        strokeTextView.isEnabled = enabled
-
-        super.setEnabled(enabled)
-    }
-
-    override fun setSelected(selected : Boolean) {
-        strokeTextView.isSelected = selected
-
-        super.setSelected(selected)
-    }
-
-    override fun setTextSize(size : Float) {
-        strokeTextView.textSize = size
-
-        super.setTextSize(size)
-    }
-
-    override fun setTextSize(unit : Int , size : Float) {
-        strokeTextView.setTextSize(unit , size)
-
-        super.setTextSize(unit , size)
-    }
-
-    override fun setText(text : CharSequence , type : BufferType) {
-        if (!autoFitSpace) {
-            strokeTextView.text = text.toString()
-
-            super.setText(text , type)
-            return
+            // 3. 设置新的尺寸
+            setMeasuredDimension(newWidth , newHeight)
         }
-
-        val builder = SpannableStringBuilder()
-        if (!TextUtils.isEmpty(text)) {
-            val space = " "
-            val s = text.toString()
-
-            if (!s.startsWith(space)) builder.append(space)
-
-            builder.append(text)
-
-            if (!s.endsWith(space)) builder.append(space)
-        }
-
-        strokeTextView.text = builder.toString()
-
-        super.setText(builder , type)
-    }
-
-    override fun setCompoundDrawablePadding(pad : Int) {
-        strokeTextView.compoundDrawablePadding = pad
-
-        super.setCompoundDrawablePadding(pad)
-    }
-
-    override fun setCompoundDrawables(left : Drawable? , top : Drawable? , right : Drawable? , bottom : Drawable?) {
-        strokeTextView.setCompoundDrawables(left , top , right , bottom)
-
-        super.setCompoundDrawables(left , top , right , bottom)
-    }
-
-    override fun setCompoundDrawablesRelative(start : Drawable? , top : Drawable? , end : Drawable? , bottom : Drawable?) {
-        strokeTextView.setCompoundDrawablesRelative(start , top , end , bottom)
-
-        super.setCompoundDrawablesRelative(start , top , end , bottom)
     }
 
     override fun onDraw(canvas : Canvas) {
-        strokeTextView.draw(canvas)
+        // 1. 保存当前的 Canvas 状态
+        canvas.save()
 
-        super.onDraw(canvas)
-    }
+        // 2. 将 Canvas 向右下方平移 strokeWidth 的距离
+        // 这样文本和描边都会被推入新增的 onMeasure 空间中央
+        canvas.translate(strokeWidth , strokeWidth)
 
-    /** 设置描边颜色  */
-    fun setStrokeColor(color : Int) {
-        strokeColor = ColorStateList.valueOf(color)
-        strokeTextView.setTextColor(strokeColor)
-    }
+        //保存设定的字色
+        val currentTextColor = textColors
 
-    /** 设置描边颜色  */
-    fun setStrokeColor(color : ColorStateList) {
-        strokeColor = color
-        strokeTextView.setTextColor(strokeColor)
-    }
-
-    var strokeWidth : Float
-        /** 获取描边宽度，单位：px  */
-        get() = mStrokeWidth
-        /** 设置描边宽度，单位：px  */
-        set(width) {
-            mStrokeWidth = width
-
-            val strokePaint = strokeTextView.paint
-            strokePaint.strokeWidth = mStrokeWidth
+        //绘制描边
+        with(paint) {
+            style = Style.STROKE
+            strokeWidth = this@XMStrokeTextView.strokeWidth
+            setTextColor(strokeColor)
         }
+        super.onDraw(canvas)
 
-    /** 是否自动填充空格适配  */
-    fun isAutoFitSpace() : Boolean {
-        return autoFitSpace
-    }
+        //绘制填充
+        with(paint) {
+            style = Style.FILL
+            setTextColor(currentTextColor)
+        }
+        super.onDraw(canvas)
 
-    /** 设置是否自动填充空格适配  */
-    fun setAutoFitSpace(autoFitSpace : Boolean) {
-        this.autoFitSpace = autoFitSpace
-
-        invalidate()
+        // 3. 恢复 Canvas 状态，避免影响后续绘制
+        canvas.restore()
     }
 }
