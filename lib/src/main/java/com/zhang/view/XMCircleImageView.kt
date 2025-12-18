@@ -4,16 +4,15 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapShader
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Matrix
 import android.graphics.Paint
-import android.graphics.Path
 import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
-import kotlin.math.max
 import kotlin.math.min
 
 /**
@@ -27,19 +26,48 @@ class XMCircleImageView @JvmOverloads constructor(
     defStyleAttr : Int = 0 ,
 ) : AppCompatImageView(context , attrs , defStyleAttr) {
 
-    private val mShaderMatrix = Matrix()
-    private val mBitmapPaint = Paint()
-    private var mBitmapShader : BitmapShader? = null
+    private val shaderMatrix : Matrix by lazy { Matrix() }
+    private val bitmapPaint : Paint by lazy { Paint() }
+    private var bitmapShader : BitmapShader? = null
 
-    private var mBitmapWidth = 0
-    private var mBitmapHeight = 0
-    var viewSize : Int = 0
-        private set
-    private var mBitmap : Bitmap? = null
 
-    private var mPath : Path? = null
+    /**描边颜色*/
+    var borderColor : Int = Color.TRANSPARENT
+        set(value) {
+            if (field == value) return
+            field = value
+            mBorderPaint.color = value
+            invalidate()
+        }
+
+    /**描边宽度*/
+    var borderWidth : Float = 0F
+        set(value) {
+            if (field == value) return
+            field = value
+            mBorderPaint.strokeWidth = value
+            invalidate()
+        }
+
+    private val mBorderPaint : Paint by lazy {
+        Paint().apply {
+            isAntiAlias = true
+            style = Paint.Style.STROKE
+            color = borderColor
+            strokeWidth = borderWidth
+        }
+    }
+
+    private var viewSize : Int = 0
+
 
     init {
+        context.obtainStyledAttributes(attrs , R.styleable.XMCircleImageView).apply {
+            borderWidth = getDimension(R.styleable.XMCircleImageView_borderWidth , 0F)
+            borderColor = getColor(R.styleable.XMCircleImageView_borderColor , Color.TRANSPARENT)
+            recycle()
+        }
+
         super.setScaleType(ScaleType.CENTER_CROP)
     }
 
@@ -49,38 +77,33 @@ class XMCircleImageView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas : Canvas) {
-        val drawable = drawable
-        if (drawable == null || width * height == 0) {
+        val drawable = drawable ?: run { super.onDraw(canvas);return }
+        if (width * height == 0) {
             return
         }
-        mBitmap = getBitmapFromDrawable(drawable)
-        if (mBitmap == null) {
-            return
-        }
+        val bitmap = getBitmapFromDrawable(drawable) ?: run { super.onDraw(canvas);return }
+        setupBitmap(bitmap)
 
-        setup()
-        canvas.drawPath(circlePath , mBitmapPaint)
+        // 计算中心点和半径
+        val centerX = width / 2F
+        val centerY = height / 2F
+
+        // 图片内容的半径需要减去描边宽度的一半，这样描边会正好在图片边缘
+        val borderRadius = viewSize / 2F - borderWidth / 2F
+        val contentRadius = borderRadius - borderWidth / 2F
+
+        // 1. 绘制图片内容
+        canvas.drawCircle(centerX , centerY , contentRadius , bitmapPaint)
+
+        // 2. 如果有描边宽度，则绘制描边
+        if (borderWidth > 0) {
+            canvas.drawCircle(centerX , centerY , borderRadius , mBorderPaint)
+        }
     }
-
-    private val circlePath : Path
-        /** 绘制正六边形的边，可以参照图 Posy/doc/HexagonImageView.jpg  */
-        get() {
-            val path = mPath ?: synchronized(this) { Path().also { mPath = it } }
-            val radius = (viewSize / 2).toFloat()
-
-            path.addCircle(
-                (width / 2).toFloat() ,
-                (height / 2).toFloat() ,
-                radius ,
-                Path.Direction.CW
-            )
-
-            return path
-        }
 
     override fun onMeasure(widthMeasureSpec : Int , heightMeasureSpec : Int) {
         super.onMeasure(widthMeasureSpec , heightMeasureSpec) //限制为正方形
-        viewSize = min(measuredWidth.toDouble() , measuredHeight.toDouble()).toInt()
+        viewSize = min(measuredWidth , measuredHeight)
         setMeasuredDimension(viewSize , viewSize)
     }
 
@@ -99,10 +122,7 @@ class XMCircleImageView @JvmOverloads constructor(
         invalidate()
     }
 
-    private fun getBitmapFromDrawable(drawable : Drawable?) : Bitmap? {
-        if (drawable == null) {
-            return null
-        }
+    private fun getBitmapFromDrawable(drawable : Drawable) : Bitmap? {
         if (drawable is BitmapDrawable) {
             return drawable.bitmap
         }
@@ -129,32 +149,51 @@ class XMCircleImageView @JvmOverloads constructor(
         }
     }
 
-    private fun setup() {
-        if (mBitmap != null) {
-            mBitmapShader = BitmapShader(mBitmap!! , Shader.TileMode.CLAMP , Shader.TileMode.CLAMP)
-            mBitmapPaint.isAntiAlias = true
-            mBitmapHeight = mBitmap!!.height
-            mBitmapWidth = mBitmap!!.width
-            updateShaderMatrix()
-            mBitmapPaint.setShader(mBitmapShader)
-        }
+    private fun setupBitmap(bitmap : Bitmap) {
+        bitmapShader = BitmapShader(bitmap , Shader.TileMode.CLAMP , Shader.TileMode.CLAMP)
+        bitmapPaint.isAntiAlias = true
+        updateShaderMatrix(bitmap.width , bitmap.height)
+        bitmapPaint.setShader(bitmapShader)
     }
 
 
-    private fun updateShaderMatrix() {
-        mShaderMatrix.set(null)
-        val scale = if (mBitmapWidth != mBitmapHeight) {
-            max((viewSize.toFloat() / mBitmapWidth).toDouble() , (viewSize.toFloat() / mBitmapHeight).toDouble()).toFloat()
+    private fun updateShaderMatrix(bitmapWidth : Int , bitmapHeight : Int) {
+        shaderMatrix.set(null)
+
+        // 内容区域的尺寸 = 视图总尺寸 - 两倍的描边宽度
+        val contentSize = viewSize - borderWidth * 2
+
+        // 如果内容区域小于等于0，则无需绘制图片
+        if (contentSize <= 0) {
+            // 可以将shader置空，避免绘制任何内容
+            bitmapPaint.shader = null
+            return
         } else {
-            viewSize.toFloat() / mBitmapWidth
+            bitmapPaint.shader = bitmapShader
         }
 
-        mShaderMatrix.setScale(scale , scale) //放大铺满
+        val scale : Float
+        val dx : Float
+        val dy : Float
 
-        val dx = viewSize - mBitmapWidth * scale
-        val dy = viewSize - mBitmapHeight * scale
-        mShaderMatrix.postTranslate(dx / 2 , dy / 2) //平移居中
-        mBitmapShader!!.setLocalMatrix(mShaderMatrix)
+        // 计算缩放比例，让图片能填满内容区域
+        if (bitmapWidth * contentSize > contentSize * bitmapHeight) {
+            // 图片更宽，以高度为准进行缩放
+            scale = contentSize / bitmapHeight
+            dx = (contentSize - bitmapWidth * scale) * 0.5f
+            dy = 0f
+        } else {
+            // 图片更高或等比，以宽度为准进行缩放
+            scale = contentSize / bitmapWidth
+            dx = 0f
+            dy = (contentSize - bitmapHeight * scale) * 0.5f
+        }
+
+        shaderMatrix.setScale(scale , scale)
+        // 平移时，需要先移动到内容区域的左上角（即 mBorderWidth），再加上居中的偏移量
+        shaderMatrix.postTranslate(borderWidth + dx , borderWidth + dy)
+
+        bitmapShader!!.setLocalMatrix(shaderMatrix)
     }
 
     companion object {

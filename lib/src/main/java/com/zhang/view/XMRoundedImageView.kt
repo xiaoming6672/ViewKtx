@@ -6,6 +6,7 @@ import android.graphics.Path
 import android.graphics.RectF
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
+import com.zhang.lib.ktx.common.ifTrue
 import com.zhang.library.utils.context.ViewUtils
 
 /**
@@ -40,18 +41,62 @@ class XMRoundedImageView @JvmOverloads constructor(
     }
 
     private fun initAttributes(context : Context , attrs : AttributeSet?) {
-        val a = context.obtainStyledAttributes(attrs , R.styleable.XMRoundedImageView)
+        context.obtainStyledAttributes(attrs , R.styleable.XMRoundedImageView).apply {
+            hasValue(R.styleable.XMRoundedImageView_radius).ifTrue {
+                with(getDimension(R.styleable.XMRoundedImageView_radius , 0F)) {
+                    mTopLeftRadius = this
+                    mTopRightRadius = this
+                    mBottomLeftRadius = this
+                    mBottomRightRadius = this
+                }
+            }
 
-        if (a.hasValue(R.styleable.XMRoundedImageView_radius)) mRadius =
-            a.getDimension(R.styleable.XMRoundedImageView_radius , 0f)
-        else {
-            mTopLeftRadius = a.getDimension(R.styleable.XMRoundedImageView_radiusTopLeft , 0f)
-            mTopRightRadius = a.getDimension(R.styleable.XMRoundedImageView_radiusTopRight , 0f)
-            mBottomLeftRadius = a.getDimension(R.styleable.XMRoundedImageView_radiusBottomLeft , 0f)
-            mBottomRightRadius = a.getDimension(R.styleable.XMRoundedImageView_radiusBottomRight , 0f)
+            hasValue(R.styleable.XMRoundedImageView_radiusTopPart).ifTrue {
+                with(getDimension(R.styleable.XMRoundedImageView_radiusTopPart , 0F)) {
+                    mTopLeftRadius = this
+                    mTopRightRadius = this
+                }
+            }
+
+            hasValue(R.styleable.XMRoundedImageView_radiusBottomPart).ifTrue {
+                with(getDimension(R.styleable.XMRoundedImageView_radiusBottomPart , 0F)) {
+                    mBottomLeftRadius = this
+                    mBottomRightRadius = this
+                }
+            }
+
+            hasValue(R.styleable.XMRoundedImageView_radiusLeftPart).ifTrue {
+                with(getDimension(R.styleable.XMRoundedImageView_radiusLeftPart , 0F)) {
+                    mTopLeftRadius = this
+                    mBottomLeftRadius = this
+                }
+            }
+
+            hasValue(R.styleable.XMRoundedImageView_radiusRightPart).ifTrue {
+                with(getDimension(R.styleable.XMRoundedImageView_radiusRightPart , 0F)) {
+                    mTopRightRadius = this
+                    mBottomRightRadius = this
+                }
+            }
+
+            hasValue(R.styleable.XMRoundedImageView_radiusTopLeft).ifTrue {
+                mTopLeftRadius = getDimension(R.styleable.XMRoundedImageView_radiusTopLeft , 0F)
+            }
+
+            hasValue(R.styleable.XMRoundedImageView_radiusTopRight).ifTrue {
+                mTopRightRadius = getDimension(R.styleable.XMRoundedImageView_radiusTopRight , 0F)
+            }
+
+            hasValue(R.styleable.XMRoundedImageView_radiusBottomLeft).ifTrue {
+                mBottomLeftRadius = getDimension(R.styleable.XMRoundedImageView_radiusBottomLeft , 0F)
+            }
+
+            hasValue(R.styleable.XMRoundedImageView_radiusBottomRight).ifTrue {
+                mBottomRightRadius = getDimension(R.styleable.XMRoundedImageView_radiusBottomRight , 0F)
+            }
+
+            recycle()
         }
-
-        a.recycle()
     }
 
     override fun onDraw(canvas : Canvas) {
@@ -60,28 +105,6 @@ class XMRoundedImageView @JvmOverloads constructor(
     }
 
     private val roundedPath : Path
-        /** 获取圆角矩形路径  */
-        get() = if (mRadius != null) uniteCornersPath
-        else differentCornersPath
-
-    private val uniteCornersPath : Path
-        /** 获取四个圆角度数统一的路径  */
-        get() {
-            val path = Path()
-
-            val rect = RectF(
-                /* left = */ 0f ,
-                /* top = */ 0f ,
-                /* right = */ ViewUtils.getWidth(this).toFloat() ,
-                /* bottom = */ ViewUtils.getHeight(this).toFloat()
-            )
-            path.addRoundRect(rect , mRadius!! , mRadius!! , Path.Direction.CW)
-
-            return path
-        }
-
-    /** 获取四个圆角度数不统一的路径  */
-    private val differentCornersPath : Path
         get() {
             val radius = floatArrayOf(
                 mTopLeftRadius , mTopLeftRadius ,
@@ -101,4 +124,5 @@ class XMRoundedImageView @JvmOverloads constructor(
 
             return path
         }
+
 }

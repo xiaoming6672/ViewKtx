@@ -29,9 +29,6 @@ open class XMStrokeTextView @JvmOverloads constructor(
     lateinit var strokeColor : ColorStateList
         private set
 
-    /**自动适应补充空格*/
-    var autoFitSpace = false
-
 
     init {
         initAttribute(attrs)
@@ -44,7 +41,6 @@ open class XMStrokeTextView @JvmOverloads constructor(
                     ?: ColorStateList.valueOf(Color.TRANSPARENT)
 
                 strokeWidth = getDimension(R.styleable.XMStrokeTextView_strokeWidth , 0F)
-                autoFitSpace = getBoolean(R.styleable.XMStrokeTextView_autoFitSpace , false)
 
                 recycle()
             }
@@ -91,23 +87,6 @@ open class XMStrokeTextView @JvmOverloads constructor(
         postInvalidate()
     }
 
-    override fun setText(text : CharSequence? , type : BufferType?) {
-        if (autoFitSpace) {
-            text.takeUnless { it.isNullOrEmpty() }?.let {
-                val builder = StringBuilder()
-                if (it[0] != ' ') {
-                    builder.append(" ")
-                }
-                builder.append(it)
-                super.setText(builder , type)
-            } ?: run {
-                super.setText(text , type)
-            }
-        } else {
-            super.setText(text , type)
-        }
-    }
-
     override fun onMeasure(widthMeasureSpec : Int , heightMeasureSpec : Int) {
         // 1. 先让父类计算出文本本身的尺寸
         super.onMeasure(widthMeasureSpec , heightMeasureSpec)
@@ -115,15 +94,16 @@ open class XMStrokeTextView @JvmOverloads constructor(
         if (strokeWidth > 0) {
             // 2. 获取原始计算出的宽高
             val originalWidth = measuredWidth
-            val originalHeight = measuredHeight
+//            val originalHeight = measuredHeight
 
             // 3. 增加描边宽度
             // 描边是居中于文本轮廓绘制的，所以需要左右/上下各留出 strokeWidth
             val newWidth = strokeWidth.times(2).plus(originalWidth).toInt()
-            val newHeight = strokeWidth.times(2).plus(originalHeight).toInt()
+//            val newHeight = strokeWidth.times(2).plus(originalHeight).toInt()
 
             // 3. 设置新的尺寸
-            setMeasuredDimension(newWidth , newHeight)
+//            setMeasuredDimension(newWidth , newHeight)
+            setMeasuredDimension(newWidth , measuredHeight)
         }
     }
 
@@ -133,7 +113,8 @@ open class XMStrokeTextView @JvmOverloads constructor(
 
         // 2. 将 Canvas 向右下方平移 strokeWidth 的距离
         // 这样文本和描边都会被推入新增的 onMeasure 空间中央
-        canvas.translate(strokeWidth , strokeWidth)
+//        canvas.translate(strokeWidth , strokeWidth)
+        canvas.translate(strokeWidth , 0F)
 
         //保存设定的字色
         val currentTextColor = textColors

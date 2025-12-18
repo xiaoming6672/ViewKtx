@@ -25,11 +25,12 @@
         android:text="@string/app_name"
         android:textColor="@color/black"
         android:textSize="@dimen/sp_50"
-        app:autoFitSpace="true"
         app:layout_constrainedWidth="true"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:strokeColor="@color/red"
-        app:strokeWidth="@dimen/dp_5" />
+        app:strokeWidth="@dimen/dp_5"
+        tools:text="啊哈哈" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

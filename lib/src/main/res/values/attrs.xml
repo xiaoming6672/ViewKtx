@@ -3,13 +3,11 @@
     <declare-styleable name="XMStrokeTextView">
         <attr name="strokeColor" format="color" />
         <attr name="strokeWidth" format="dimension" />
-        <attr name="autoFitSpace" format="boolean" />
     </declare-styleable>
 
     <declare-styleable name="StrokeTextView">
         <attr name="strokeColor" />
         <attr name="strokeWidth" />
-        <attr name="autoFitSpace" />
     </declare-styleable>
 
     <declare-styleable name="XMGradientTextView">
@@ -31,16 +29,29 @@
         </attr>
     </declare-styleable>
 
+    <declare-styleable name="XMCircleImageView">
+        <attr name="borderWidth" format="dimension" />
+        <attr name="borderColor" format="color" />
+    </declare-styleable>
+
     <declare-styleable name="XMRoundedImageView">
-        <!-- Defines the radius of the four corners. -->
+        <!--四个圆角-->
         <attr name="radius" format="dimension" />
-        <!-- Radius of the top left corner. -->
+        <!--顶部两个圆角-->
+        <attr name="radiusTopPart" format="dimension" />
+        <!--底部两个圆角-->
+        <attr name="radiusBottomPart" format="dimension" />
+        <!--左侧两个圆角-->
+        <attr name="radiusLeftPart" format="dimension" />
+        <!--右侧两个圆角-->
+        <attr name="radiusRightPart" format="dimension" />
+        <!--左上角圆角-->
         <attr name="radiusTopLeft" format="dimension" />
-        <!-- Radius of the top right corner. -->
+        <!--右上角圆角-->
         <attr name="radiusTopRight" format="dimension" />
-        <!-- Radius of the bottom left corner. -->
+        <!--左下角圆角-->
         <attr name="radiusBottomLeft" format="dimension" />
-        <!-- Radius of the bottom right corner. -->
+        <!--右下角圆角-->
         <attr name="radiusBottomRight" format="dimension" />
     </declare-styleable>
 
@@ -103,4 +114,5 @@
     <declare-styleable name="XMFitsSystemRelativeLayout">
         <attr name="fitsSystemStyle" />
     </declare-styleable>
+
 </resources>
