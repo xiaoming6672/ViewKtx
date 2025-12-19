@@ -32,24 +32,13 @@ class XMCircleImageView @JvmOverloads constructor(
 
 
     /**描边颜色*/
-    var borderColor : Int = Color.TRANSPARENT
-        set(value) {
-            if (field == value) return
-            field = value
-            mBorderPaint.color = value
-            invalidate()
-        }
+    private var borderColor : Int = Color.TRANSPARENT
 
     /**描边宽度*/
-    var borderWidth : Float = 0F
-        set(value) {
-            if (field == value) return
-            field = value
-            mBorderPaint.strokeWidth = value
-            invalidate()
-        }
+    private var borderWidth : Float = 0F
 
-    private val mBorderPaint : Paint by lazy {
+    /**描边Paint对象*/
+    private val borderPaint : Paint by lazy {
         Paint().apply {
             isAntiAlias = true
             style = Paint.Style.STROKE
@@ -97,7 +86,7 @@ class XMCircleImageView @JvmOverloads constructor(
 
         // 2. 如果有描边宽度，则绘制描边
         if (borderWidth > 0) {
-            canvas.drawCircle(centerX , centerY , borderRadius , mBorderPaint)
+            canvas.drawCircle(centerX , centerY , borderRadius , borderPaint)
         }
     }
 
@@ -195,6 +184,27 @@ class XMCircleImageView @JvmOverloads constructor(
 
         bitmapShader!!.setLocalMatrix(shaderMatrix)
     }
+
+
+    /**
+     * 设置描边
+     *
+     * @param color 描边颜色
+     * @param width 描边宽度
+     */
+    fun setBoarder(color : Int , width : Float) {
+        if (borderColor == color && borderWidth == width) return
+
+        if (borderColor != color) {
+            borderColor = color
+            borderPaint.color = color
+        }
+        if (borderWidth != width) {
+            borderWidth = width
+            borderPaint.strokeWidth = width
+        }
+    }
+
 
     companion object {
 

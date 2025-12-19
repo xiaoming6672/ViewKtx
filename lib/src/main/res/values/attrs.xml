@@ -29,9 +29,15 @@
         </attr>
     </declare-styleable>
 
+
+    <!--边框宽度-->
+    <attr name="borderWidth" format="dimension" />
+    <!--边框颜色-->
+    <attr name="borderColor" format="color" />
+
     <declare-styleable name="XMCircleImageView">
-        <attr name="borderWidth" format="dimension" />
-        <attr name="borderColor" format="color" />
+        <attr name="borderWidth" />
+        <attr name="borderColor" />
     </declare-styleable>
 
     <declare-styleable name="XMRoundedImageView">
@@ -53,6 +59,8 @@
         <attr name="radiusBottomLeft" format="dimension" />
         <!--右下角圆角-->
         <attr name="radiusBottomRight" format="dimension" />
+        <attr name="borderWidth" />
+        <attr name="borderColor" />
     </declare-styleable>
 
     <declare-styleable name="XMAutoSizeTextView">
