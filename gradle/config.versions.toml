@@ -6,6 +6,6 @@ minSdk = "24"
 
 libGroupId = "com.lib.xiaoming"
 libArtifactId = "viewKtx"
-libVersionCode = "3"
-libVersionName = "1.2.0"
+libVersionCode = "4"
+libVersionName = "1.2.1"
 

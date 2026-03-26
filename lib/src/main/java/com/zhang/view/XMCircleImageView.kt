@@ -192,7 +192,7 @@ class XMCircleImageView @JvmOverloads constructor(
      * @param color 描边颜色
      * @param width 描边宽度
      */
-    fun setBoarder(color : Int , width : Float) {
+    fun setBorder(color : Int , width : Float) {
         if (borderColor == color && borderWidth == width) return
 
         if (borderColor != color) {

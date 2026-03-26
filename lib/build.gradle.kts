@@ -8,10 +8,10 @@ plugins {
 }
 
 
-val libGropuId = config.versions.libGroupId.get()
-val libArtifactId = config.versions.libArtifactId.get()
-val libVersionCode = config.versions.libVersionCode.get()
-val libVersionName = config.versions.libVersionName.get()
+val libGroupId : String = config.versions.libGroupId.get()
+val libArtifactId : String = config.versions.libArtifactId.get()
+val libVersionCode : String = config.versions.libVersionCode.get()
+val libVersionName : String = config.versions.libVersionName.get()
 
 
 android {
@@ -76,7 +76,7 @@ dependencies {
 publishing {
     publications {
         create<MavenPublication>("release") {
-            groupId = libGropuId
+            groupId = libGroupId
             artifactId = libArtifactId
             version = libVersionName
 
