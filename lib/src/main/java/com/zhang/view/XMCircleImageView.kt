@@ -9,10 +9,11 @@ import android.graphics.Matrix
 import android.graphics.Paint
 import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.graphics.createBitmap
 import kotlin.math.min
 
 /**
@@ -66,11 +67,11 @@ class XMCircleImageView @JvmOverloads constructor(
     }
 
     override fun onDraw(canvas : Canvas) {
-        val drawable = drawable ?: run { super.onDraw(canvas);return }
+        val drawable = drawable ?: run { super.onDraw(canvas); return }
         if (width * height == 0) {
             return
         }
-        val bitmap = getBitmapFromDrawable(drawable) ?: run { super.onDraw(canvas);return }
+        val bitmap = getBitmapFromDrawable(drawable) ?: run { super.onDraw(canvas); return }
         setupBitmap(bitmap)
 
         // 计算中心点和半径
@@ -113,27 +114,29 @@ class XMCircleImageView @JvmOverloads constructor(
 
     private fun getBitmapFromDrawable(drawable : Drawable) : Bitmap? {
         if (drawable is BitmapDrawable) {
-            return drawable.bitmap
+            val bitmap = drawable.bitmap
+            // 解决 Hardware Bitmap 不支持软件渲染的问题
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && bitmap.config == Bitmap.Config.HARDWARE) {
+                return bitmap.copy(Bitmap.Config.ARGB_8888 , false)
+            }
+            return bitmap
         }
 
         try {
-            val bitmap = if (drawable is ColorDrawable) {
-                Bitmap.createBitmap(
-                    COLOR_DRAWABLE_DIMENSION ,
-                    COLOR_DRAWABLE_DIMENSION , BITMAP_CONFIG
-                )
-            } else {
-                Bitmap.createBitmap(
-                    drawable.intrinsicWidth ,
-                    drawable.intrinsicHeight , BITMAP_CONFIG
-                )
-            }
+            val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else viewSize
+            val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else viewSize
 
+            if (width <= 0 || height <= 0) return null
+
+            val bitmap = createBitmap(width , height , Bitmap.Config.ARGB_8888)
             val canvas = Canvas(bitmap)
-            drawable.setBounds(0 , 0 , viewSize , viewSize)
+            // 设置 bounds 为 canvas 的大小，确保完整绘制
+            drawable.setBounds(0 , 0 , canvas.width , canvas.height)
             drawable.draw(canvas)
             return bitmap
         } catch (e : OutOfMemoryError) {
+            // 捕获包括 IllegalArgumentException 在内的所有异常，防止 CrossfadeDrawable 绘制失败导致崩溃
+            e.printStackTrace()
             return null
         }
     }
@@ -208,7 +211,6 @@ class XMCircleImageView @JvmOverloads constructor(
 
     companion object {
 
-        private val BITMAP_CONFIG = Bitmap.Config.ARGB_8888
         private const val COLOR_DRAWABLE_DIMENSION = 1
     }
 }
